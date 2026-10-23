@@ -71,3 +71,22 @@ media.apollosolution.com.br {
 # 		max_size 512MB
 # 	}
 # }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ETAPA 3 — ápice e www (23/out/2026).
+#
+# O ápice apontava para o estacionamento da Hostinger, que servia PROPAGANDA DE
+# HOSPEDAGEM no domínio do produto — pior que um erro. Agora o A do ápice vem
+# para 178.156.139.176 (nuvem cinza) e este bloco manda para o app.
+#
+# ⚠️ 302 (temporário) DE PROPÓSITO, ao contrário da Etapa 2, que é 301. O ápice
+# VAI receber o site institucional e as páginas legais; um redirect permanente
+# fica cacheado no navegador de quem visitou e brigaria com o site novo quando
+# ele entrar. `redir` sem `permanent` já é 302.
+#
+# Quando o site institucional existir: trocar este bloco por um `root`/
+# `file_server` (ou proxy), e NÃO reaproveitar o redirect.
+# ─────────────────────────────────────────────────────────────────────────────
+apollomedia.com.br, www.apollomedia.com.br {
+	redir https://app.apollomedia.com.br{uri}
+}
