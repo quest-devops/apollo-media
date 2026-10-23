@@ -239,3 +239,31 @@
     flex: 1;
   }
 }
+
+/* ── Aviso de licença (AGPL §13) ──────────────────────────────── */
+/* Posicionado por absoluto no rodapé da coluna para não desalinhar o
+   formulário, que é centrado verticalmente. Discreto, mas legível: cinza do
+   tema, sublinhado, e verde da marca no hover. */
+.apollo-login .apollo-coluna {
+  position: relative;
+}
+.apollo-login .apollo-agpl {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(385px, 92vw);
+  margin: 0;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #8a938e;
+}
+.apollo-login .apollo-agpl a {
+  color: #8a938e;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.apollo-login .apollo-agpl a:hover {
+  color: #2fe68c;
+}

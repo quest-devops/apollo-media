@@ -70,6 +70,32 @@ export default async function AuthLayout({
       {/* Coluna do formulário. */}
       <main className="apollo-coluna">
         <div className="apollo-form">{children}</div>
+
+        {/* AGPL-3.0, seção 13 — publicar o repositório NÃO basta. A licença
+            exige OFERECER o fonte correspondente a quem interage com o
+            programa pela rede. Esta é a única tela por onde todo usuário
+            passa (o cadastro é fechado), então o aviso mora aqui.
+            ⚠️ Ao mexer: o link tem de continuar visível e clicável —
+            escondê-lo por estética reabre a inadimplência. */}
+        <p className="apollo-agpl">
+          Derivado do{' '}
+          <a
+            href="https://github.com/gitroomhq/postiz-app"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Postiz
+          </a>{' '}
+          sob AGPL-3.0. Fonte modificado:{' '}
+          <a
+            href="https://github.com/quest-devops/apollo-media"
+            target="_blank"
+            rel="noreferrer"
+          >
+            quest-devops/apollo-media
+          </a>
+          .
+        </p>
       </main>
     </div>
   );

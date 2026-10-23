@@ -166,6 +166,17 @@ RUN grep -q "apollo-painel" "/app/apps/frontend/src/app/(app)/auth/layout.tsx" \
  && grep -q "apollo-icone" /app/apps/frontend/src/components/new-layout/logo.tsx \
  || (echo "!! ERRO: patch de marca nao aplicou" && exit 1)
 
+# ⚠️ GUARDA DE CONFORMIDADE — AGPL §13.
+# A licença exige OFERECER o fonte a quem usa o serviço pela rede, não apenas
+# publicá-lo. O link mora na tela de login (por onde todo mundo passa, já que o
+# cadastro é fechado) e na tela de Desenvolvedores. Se um upgrade do upstream
+# derrubar esses patches, a imagem sai sem a oferta e a inadimplência volta SEM
+# NINGUÉM PERCEBER. Por isso o build falha aqui, em vez de entregar uma imagem
+# silenciosamente fora de conformidade.
+RUN grep -q "quest-devops/apollo-media" "/app/apps/frontend/src/app/(app)/auth/layout.tsx" \
+ && grep -q "quest-devops/apollo-media" "/app/apps/frontend/src/app/(app)/(site)/developers/page.tsx" \
+ || (echo "!! ERRO: o aviso de fonte aberto (AGPL 13) sumiu das telas" && exit 1)
+
 # 5. Reconstrói o frontend com os patches dentro.
 RUN pnpm run build:frontend
 
