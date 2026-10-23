@@ -1,0 +1,184 @@
+# ApolloMedia — Postiz (imagem oficial, AGPL-3.0). Instância interna da Apollo:
+# é o LABORATÓRIO da frente (E1), ainda sem rebrand — o fork de marca é a E4.
+#
+# Sem portas publicadas DE PROPÓSITO: quem expõe é o Caddy compartilhado
+# (apollo-cloud-caddy-1), que entra na rede deste stack e roteia por NOME DE
+# CONTAINER. Padrão da casa — igual Plan, Cloud, Mail, Key, CRM e Desk.
+#
+# Subir:  docker compose -f docker-compose.yml --env-file .env up -d
+# Ligar o Caddy na rede (uma vez, depois do primeiro up):
+#         docker network connect apollo-media_default apollo-cloud-caddy-1
+# Logs:   docker compose logs -f postiz
+#
+# ⚠️ DIVERGÊNCIAS CONSCIENTES em relação ao compose oficial
+# (github.com/gitroomhq/postiz-docker-compose) — todas com motivo:
+#   1. Nomes de container `apollo-media-*`. O oficial usa `postiz`, `temporal`,
+#      `temporal-postgresql`... nomes genéricos que COLIDIRIAM com os outros 12
+#      stacks desta máquina — e o Caddy aqui roteia por nome de container.
+#   2. Sem `ports:`. O oficial publica 4007 e 8080 em 0.0.0.0; aqui nada sai
+#      para a internet a não ser pelo Caddy, com TLS.
+#   3. Imagem PINADA (`:v2.23.0`, não `:latest`). Fonte da verdade é o Git, e
+#      `latest` faz o `up -d` trocar de versão sem ninguém pedir.
+#   4. Segredos por .env (symlink para /root/plan-secrets/), nunca no YAML.
+#      O oficial deixa senha do Postgres e JWT_SECRET escritos no arquivo.
+name: apollo-media
+
+services:
+  # ⚠️ Container ÚNICO: frontend Next.js + backend NestJS + worker + cron numa
+  # imagem só, servidos por um Caddy interno na porta 5000. Não separar.
+  postiz:
+    # Imagem DERIVADA (deploy/Dockerfile): Postiz v2.23.0 + paleta verde da
+    # Apollo + tela de login no padrão da casa. O rebrand é assado na imagem,
+    # nunca no container — mudança feita no container some no primeiro `pull`
+    # e não fica em lugar nenhum do git.
+    image: apollo-media:v2.23.0-apollomedia
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: apollo-media-postiz
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:?defina POSTGRES_USER no .env}:${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}@apollo-media-db:5432/postiz
+      REDIS_URL: redis://apollo-media-redis:6379
+      # ⚠️ BACKEND_INTERNAL_URL é localhost DE PROPÓSITO: é o SSR do Next
+      # falando com o Nest DENTRO do mesmo container. Trocar por hostname
+      # externo faz a página renderizar vazia sem erro no log.
+      BACKEND_INTERNAL_URL: http://localhost:3000
+      TEMPORAL_ADDRESS: apollo-media-temporal:7233
+      IS_GENERAL: "true"
+      # ⚠️ Cadastro FECHADO — padrão da casa em lab exposto na internet.
+      DISABLE_REGISTRATION: "true"
+      RUN_CRON: "true"
+      STORAGE_PROVIDER: local
+      UPLOAD_DIRECTORY: /uploads
+      NEXT_PUBLIC_UPLOAD_DIRECTORY: /uploads
+      NX_ADD_PLUGINS: "false"
+      API_LIMIT: "30"
+    volumes:
+      - config_data:/config/
+      - uploads_data:/uploads/
+    healthcheck:
+      test: ["CMD", "node", "-e", "const r=require('http').get('http://localhost:5000/',res=>process.exit(res.statusCode<500?0:1));r.on('error',()=>process.exit(1));r.setTimeout(4000,()=>{r.destroy();process.exit(1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      temporal:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: apollo-media-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postiz
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postiz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.2
+    container_name: apollo-media-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------
+  # Temporal — NÃO é opcional, e é a novidade que a pesquisa de jul/2026 não
+  # tinha. O Postiz moveu o agendamento para workflows do Temporal: sem ele o
+  # app sobe, a tela aparece e NADA É PUBLICADO NA HORA MARCADA. É o mesmo tipo
+  # de armadilha do Sidekiq no ApolloDesk — parece funcionar, e não funciona.
+  # ---------------------------------------------------------------------
+  temporal:
+    image: temporalio/auto-setup:1.28.1
+    container_name: apollo-media-temporal
+    restart: unless-stopped
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=${TEMPORAL_POSTGRES_PASSWORD:?defina TEMPORAL_POSTGRES_PASSWORD no .env}
+      - POSTGRES_SEEDS=apollo-media-temporal-db
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+      - ENABLE_ES=true
+      - ES_SEEDS=apollo-media-elastic
+      - ES_VERSION=v7
+      - TEMPORAL_NAMESPACE=default
+    volumes:
+      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+    healthcheck:
+      test: ["CMD", "temporal", "operator", "cluster", "health", "--address", "apollo-media-temporal:7233"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    depends_on:
+      temporal-db:
+        condition: service_healthy
+      elastic:
+        condition: service_healthy
+
+  temporal-db:
+    image: postgres:16-alpine
+    container_name: apollo-media-temporal-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: ${TEMPORAL_POSTGRES_PASSWORD:?defina TEMPORAL_POSTGRES_PASSWORD no .env}
+    volumes:
+      - temporal_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ⚠️ Elasticsearch com heap de 256 MB (igual ao oficial). É o componente mais
+  # pesado do stack e existe só para a visibilidade do Temporal.
+  elastic:
+    image: elasticsearch:7.17.27
+    container_name: apollo-media-elastic
+    restart: unless-stopped
+    environment:
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=512mb
+      - cluster.routing.allocation.disk.watermark.high=256mb
+      - cluster.routing.allocation.disk.watermark.flood_stage=128mb
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
+      - xpack.security.enabled=false
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS \"http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s\" || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+volumes:
+  postgres_data:
+  redis_data:
+  config_data:
+  uploads_data:
+  temporal_db_data:
+  elastic_data:

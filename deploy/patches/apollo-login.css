@@ -1,0 +1,241 @@
+/*
+ * ApolloMedia — estilo da tela de login ("terminal emerald" da casa).
+ *
+ * Vai para apps/frontend/src/app/(app)/auth/apollo-login.css e é importado
+ * pelo layout daquela rota — por isso não vaza para o resto do app.
+ *
+ * Os valores são os MESMOS do ApolloDesk (que por sua vez copiou do
+ * ApolloAuth): #2fe68c no destaque, #eff8f3 no texto, raio 10 nos campos e 16
+ * no painel, VT323 no título com brilho, JetBrains Mono no resto. Não
+ * redesenhar — o objetivo é que os logins fiquem idênticos lado a lado.
+ */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/apollo-JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'VT323';
+  src: url('/apollo-VT323-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Palco ─────────────────────────────────────────────────────────────── */
+.apollo-login {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  color: #eff8f3;
+  background:
+    linear-gradient(rgba(20, 20, 20, 0.8), rgba(20, 20, 20, 0.8)),
+    url('/apollo-login-bg.webp') center / cover no-repeat fixed;
+}
+
+/* ── Painel esquerdo ───────────────────────────────────────────────────── */
+.apollo-login .apollo-painel {
+  position: relative;
+  flex: 1 1 50%;
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background: #0d0d0d;
+  box-shadow:
+    0 0 44px rgba(47, 230, 140, 0.1),
+    inset 0 0 60px rgba(0, 0, 0, 0.35);
+}
+
+/* A arte e o véu são camadas reais, não background múltiplo — ver o comentário
+   no layout.tsx sobre por que o `background` em camadas foi abandonado. */
+.apollo-login .apollo-arte,
+.apollo-login .apollo-veu {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.apollo-login .apollo-arte {
+  object-fit: cover;
+}
+/* O véu existe para a frase do rodapé ter contraste sobre a nebulosa — sem
+   ele o texto some justamente nas partes claras da arte. */
+.apollo-login .apollo-veu {
+  background: linear-gradient(
+    to top,
+    rgba(4, 15, 9, 0.82) 0%,
+    rgba(4, 15, 9, 0) 42%
+  );
+}
+/* O lockup e a frase precisam ficar ACIMA das duas camadas. */
+.apollo-login .apollo-lockup,
+.apollo-login .apollo-frase {
+  position: relative;
+  z-index: 1;
+}
+.apollo-login .apollo-lockup {
+  width: 160px;
+  height: auto;
+}
+.apollo-login .apollo-frase {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  opacity: 0.94;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Coluna do formulário ──────────────────────────────────────────────── */
+.apollo-login .apollo-coluna {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.apollo-login .apollo-form {
+  width: min(385px, 92vw);
+  display: flex;
+}
+.apollo-login .apollo-form > * {
+  flex: 1;
+}
+
+/* Título — VT323 verde com brilho, como no IdP. */
+.apollo-login h1 {
+  margin: 0 0 24px;
+  font-family: 'VT323', monospace;
+  font-weight: 400;
+  font-size: 45px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #2fe68c;
+  text-align: center;
+  text-shadow:
+    0 0 1px rgba(47, 230, 140, 0.95),
+    0 0 6px rgba(47, 230, 140, 0.8),
+    0 0 15px rgba(47, 230, 140, 0.55),
+    0 0 34px rgba(47, 230, 140, 0.35);
+}
+
+/* ── Campos ────────────────────────────────────────────────────────────── */
+/* ⚠️ Os rótulos ("Email", "Password") vinham quase invisíveis: o Postiz os
+   pinta com um cinza pensado para o fundo roxo-escuro dele, que sobre o nosso
+   preto some. Aqui eles voltam ao texto claro da casa. */
+.apollo-login label {
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #eff8f3;
+}
+/* ⚠️ Os textos do formulário ("Continue With", "Email", "Password") vinham
+   em #0e0e0e — preto sobre preto, praticamente invisíveis. A cor é HERDADA de
+   um wrapper do Postiz, não vem de variável, então recolorir a paleta não
+   resolve: tem de ser aqui.
+   ⚠️ E a exceção logo abaixo não é detalhe: sem ela, o botão branco do
+   provedor (Google hoje, ApolloAuth na E5) fica com texto branco sobre branco
+   — o texto some e o botão vira uma barra vazia. Já aconteceu na bancada. */
+.apollo-login .apollo-form div {
+  font-family: inherit;
+  color: #eff8f3;
+}
+.apollo-login .apollo-form .bg-white,
+.apollo-login .apollo-form .bg-white div {
+  color: #0e0e0e;
+}
+.apollo-login input[type='email'],
+.apollo-login input[type='password'],
+.apollo-login input[type='text'] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 15px;
+  background: rgba(22, 25, 23, 0.85);
+  color: #eff8f3;
+  border: 1px solid rgba(158, 171, 164, 0.3);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  box-shadow: none;
+}
+.apollo-login input:focus {
+  outline: 0;
+  border-color: #2fe68c;
+  box-shadow: 0 0 0 3px rgba(47, 230, 140, 0.18);
+}
+.apollo-login input::placeholder {
+  color: #8a938e;
+  opacity: 1;
+  font-style: italic;
+}
+
+/* O autofill do Chrome pinta o campo de branco por cima de qualquer
+   background — só o inset gigante sobrescreve. Herdado do ApolloMail, onde o
+   problema apareceu primeiro. */
+.apollo-login input:-webkit-autofill,
+.apollo-login input:-webkit-autofill:hover,
+.apollo-login input:-webkit-autofill:focus {
+  -webkit-box-shadow: inset 0 0 0 1000px #161916;
+  -webkit-text-fill-color: #eff8f3;
+  caret-color: #eff8f3;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.apollo-login a {
+  color: #2fe68c;
+}
+
+/* ── Botão ─────────────────────────────────────────────────────────────── */
+/* Verde da marca com texto GRAFITE. Branco sobre verde é proibido pelo manual
+   (1.64:1, reprova em WCAG) — e é exatamente o que o Postiz fazia no roxo. */
+.apollo-login button[type='submit'] {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #2fe68c;
+  color: #202020;
+  border: 1px solid #2fe68c;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 0 12px rgba(47, 230, 140, 0.5),
+    0 0 28px rgba(47, 230, 140, 0.28);
+  transition: box-shadow 0.15s ease;
+}
+.apollo-login button[type='submit']:hover:not(:disabled) {
+  box-shadow:
+    0 0 16px rgba(47, 230, 140, 0.65),
+    0 0 36px rgba(47, 230, 140, 0.38);
+}
+.apollo-login button[type='submit']:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+.apollo-login button[type='submit'] * {
+  color: #202020;
+}
+
+/* ── Telas estreitas: sem split, painel fora ───────────────────────────── */
+@media (max-width: 1100px) {
+  .apollo-login .apollo-painel {
+    display: none;
+  }
+  .apollo-login .apollo-coluna {
+    flex: 1;
+  }
+}

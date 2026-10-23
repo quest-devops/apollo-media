@@ -1,0 +1,17 @@
+# Segredos: o .env real mora em /root/plan-secrets/ no servidor (chmod 600).
+# Aqui só pode existir o .env.example, com os campos em branco.
+.env
+*.env
+!*.env.example
+deploy/.env
+
+# Cópias de segurança deixadas por scripts
+*.bak
+*.bak-*
+*.tmp
+.srv-*
+
+# Ruído de sistema
+node_modules/
+.DS_Store
+Thumbs.db

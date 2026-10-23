@@ -1,0 +1,7 @@
+# Sem tradução de fim de linha, em nenhuma direção.
+#
+# Tudo aqui roda no Linux (scripts de patch, .sh, Dockerfile). Com o
+# core.autocrlf do Windows ligado, um clone ganharia CRLF e o shell do servidor
+# responderia `set: Illegal option -` ao ler `set -e` — foi exatamente o que
+# quebrou o migra-host.sh em 23/out/2026.
+* -text

@@ -1,0 +1,73 @@
+# ApolloMedia — blocos para o Caddyfile COMPARTILHADO
+# (/root/apollo-cloud/deploy/Caddyfile, montado no apollo-cloud-caddy-1).
+#
+# ⚠️ Três armadilhas conhecidas ao editar esse arquivo (uma delas já apagou um
+# vhost inteiro sem o Caddy reclamar):
+#   1. O bind mount está preso por INODE: `sed -i` e `mv` trocam o inode e o
+#      container passa a ver o arquivo ANTIGO para sempre. Editar preservando
+#      o inode (`cat novo > Caddyfile`) ou recriar o container.
+#   2. Ao recortar/colar bloco, conferir o fechamento das chaves aninhadas.
+#   3. `caddy validate` ANTES do reload — o reload de config inválida deixa a
+#      config velha no ar e o erro passa despercebido.
+#
+# Pré-requisito (uma vez): docker network connect apollo-media_default apollo-cloud-caddy-1
+# Validar:    docker exec apollo-cloud-caddy-1 caddy validate --config /etc/caddy/Caddyfile
+# Recarregar: docker exec apollo-cloud-caddy-1 caddy reload  --config /etc/caddy/Caddyfile
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ETAPA 1 — host definitivo. ENTRA PRIMEIRO, ao lado do antigo.
+#
+# Os dois hosts convivem de propósito: o Caddy só consegue emitir o certificado
+# do `app.apollomedia.com.br` depois que ele existe como vhost E o DNS aponta
+# para cá. Enquanto o app ainda se anuncia no host antigo, este bloco serve
+# exatamente o mesmo conteúdo — é só para o Let's Encrypt validar.
+# ─────────────────────────────────────────────────────────────────────────────
+app.apollomedia.com.br {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=15552000; includeSubDomains"
+
+	# O Postiz é UM container só: um Caddy interno na porta 5000 já separa o
+	# Next (frontend) do Nest (/api). Por isso aqui não há matcher por rota —
+	# proxy do host inteiro. Se um dia /api for separado, NEXT_PUBLIC_BACKEND_URL
+	# precisa mudar junto, senão o app carrega e nenhuma chamada funciona.
+	reverse_proxy apollo-media-postiz:5000 {
+		# Upload de mídia para as redes passa por aqui: vídeo de Reels/TikTok
+		# estoura o buffer padrão e falha como "erro desconhecido" na tela.
+		flush_interval -1
+	}
+
+	request_body {
+		max_size 512MB
+	}
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ETAPA 2 — host de laboratório vira redirecionamento.
+#
+# SÓ DEPOIS de `migra-host.sh` ter trocado MAIN_URL/FRONTEND_URL/
+# NEXT_PUBLIC_BACKEND_URL e o app responder no host novo. Substitui o bloco
+# `media.apollosolution.com.br { ... }` original (guardado abaixo).
+#
+# ⚠️ 301 e não 302: o host antigo não volta, e cache de redirect permanente é
+# o que evita o app velho continuar sendo pedido por meses.
+# ⚠️ O `{uri}` preserva caminho e query — sem ele, todo link antigo cai na raiz
+# e um convite de equipe (que leva token na query) morre no caminho.
+# ─────────────────────────────────────────────────────────────────────────────
+media.apollosolution.com.br {
+	redir https://app.apollomedia.com.br{uri} permanent
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ARQUIVO — bloco original do laboratório (E1), para conferência/rollback.
+# Se a migração precisar voltar atrás, é este que volta no lugar da Etapa 2.
+# ─────────────────────────────────────────────────────────────────────────────
+# media.apollosolution.com.br {
+# 	encode zstd gzip
+# 	header Strict-Transport-Security "max-age=15552000; includeSubDomains"
+# 	reverse_proxy apollo-media-postiz:5000 {
+# 		flush_interval -1
+# 	}
+# 	request_body {
+# 		max_size 512MB
+# 	}
+# }
