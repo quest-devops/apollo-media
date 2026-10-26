@@ -192,6 +192,22 @@
   border-color: #eff8f3;
 }
 
+/* Ícone do provedor.
+   ⚠️ O upstream manda a imagem com `width=40 height=40` e a classe
+   `-mt-[7px]`, pensando num botão maior. Num botão de 46px isso dá um ícone
+   com 87% da altura E deslocado para cima pelo margin negativo — fica grande
+   e torto, que foi o que o Leonardo viu. 22px, margin zerado e o `gap` um
+   pouco maior devolvem a proporção do ApolloCloud. */
+.apollo-login .apollo-form [class*='bg-white'] img {
+  width: 22px;
+  height: 22px;
+  margin-top: 0;
+  object-fit: contain;
+}
+.apollo-login .apollo-form [class*='bg-white'] {
+  gap: 8px;
+}
+
 .apollo-login input[type='email'],
 .apollo-login input[type='password'],
 .apollo-login input[type='text'] {
