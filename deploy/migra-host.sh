@@ -56,6 +56,17 @@ cp -p "$ENVF" "$BKP"
 chmod 600 "$BKP"
 echo "== copia de seguranca: $BKP =="
 
+# ⚠️ ESTE SCRIPT GRAVA DIRETO NO ARQUIVO DE SEGREDOS, QUE É GERADO DO
+# 1PASSWORD. O par .env/.tpl está em /root/plan-secrets/op-mapa.txt, e o item
+# é op://apollo-infra/srv-apollo-media. Ou seja: depois de rodar isto, o
+# arquivo e o cofre DIVERGEM, e um `apollo-op-env <arq>.tpl <arq> --forcar`
+# DESFAZ a migração sem avisar. Aconteceu de verdade: em 23/out o host foi
+# migrado aqui e o cofre ficou com o endereço antigo até 26/out.
+# REGULARIZAR NO COFRE logo após rodar — não deixar para depois.
+echo "!! ATENCAO: o .env agora DIVERGE do 1Password (item srv-apollo-media)."
+echo "   Atualizar MAIN_URL, FRONTEND_URL e NEXT_PUBLIC_BACKEND_URL no cofre,"
+echo "   senao um 'apollo-op-env --forcar' desfaz esta migracao." 
+
 # ⚠️ `sed -i` aqui é SEGURO (arquivo comum, não bind mount preso por inode como
 # o Caddyfile) — mas preserva-se a permissão 600 explicitamente por garantia.
 sed -i \

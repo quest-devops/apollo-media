@@ -148,9 +148,32 @@
   font-family: inherit;
   color: #eff8f3;
 }
-.apollo-login .apollo-form .bg-white,
-.apollo-login .apollo-form .bg-white div {
-  color: #0e0e0e;
+/* ── Botão do SSO (ApolloAuth) ───────────────────────────────── */
+/* O Postiz desenha o botão de provedor com `bg-white` e texto escuro. Numa
+   tela escura isso é um retângulo branco gritando no meio do formulário —
+   cara de componente de outro produto. Aqui ele vira o botão secundário da
+   casa: superfície escura, borda verde, texto claro, mesmo desenho dos campos.
+
+   A regra anterior neste ponto só forçava texto escuro sobre o branco, para o
+   texto não sumir. Com o fundo deixando de ser branco, ela deu lugar a esta.
+
+   ⚠️ O seletor casa por `[class*='bg-white']` porque é utilitário do Tailwind
+   gerado pelo upstream: se um dia ele trocar a classe, o botão volta a ficar
+   branco — defeito visual, não funcional, mas visível na primeira tela que o
+   cliente vê. */
+.apollo-login .apollo-form [class*='bg-white'] {
+  background: rgba(22, 25, 23, 0.85);
+  border: 1px solid #2fe68c;
+  border-radius: 10px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.apollo-login .apollo-form [class*='bg-white'],
+.apollo-login .apollo-form [class*='bg-white'] div {
+  color: #eff8f3;
+}
+.apollo-login .apollo-form [class*='bg-white']:hover {
+  background: rgba(47, 230, 140, 0.12);
+  box-shadow: 0 0 0 3px rgba(47, 230, 140, 0.15);
 }
 .apollo-login input[type='email'],
 .apollo-login input[type='password'],
