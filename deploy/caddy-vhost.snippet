@@ -87,6 +87,15 @@ media.apollosolution.com.br {
 # Quando o site institucional existir: trocar este bloco por um `root`/
 # `file_server` (ou proxy), e NÃO reaproveitar o redirect.
 # ─────────────────────────────────────────────────────────────────────────────
+# 26/out: o redirect durou três dias. Agora o ápice SERVE a página de
+# apresentação (site/ deste repo, publicada em /srv/apollo-site/apollomedia).
 apollomedia.com.br, www.apollomedia.com.br {
-	redir https://app.apollomedia.com.br{uri}
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=15552000; includeSubDomains"
+	root * /srv/apollo-site/apollomedia
+	# try_files antes do file_server: sem ele, uma página futura em /termos
+	# responderia 308 para /termos/ — e são exatamente URLs SEM barra que se
+	# cadastra no painel da Meta. Mesmo motivo do site da Apollo Solution.
+	try_files {path} {path}/index.html
+	file_server
 }

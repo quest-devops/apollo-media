@@ -1,0 +1,197 @@
+/* Apollo Solution — folha única do site institucional.
+   Identidade: terminal/CRT + programa espacial retrô, dark-first, mono-accent.
+   Tokens conferidos em apollo-marketing/mkt-engine/.../design-tokens.json.
+
+   ⚠️ O verde é o ÚNICO destaque da marca. Não introduzir segunda cor de
+   acento: o "mono-accent" é o que dá a cara, e duas cores dissolvem isso. */
+
+:root {
+  --verde: #2FE68C;
+  --verde-escuro: #08200F;
+  --grafite: #202020;
+  --quase-preto: #141414;
+  --superficie: #2A2A2A;
+  --corpo: #EFF8F3;
+  --cinza: #9A9A96;
+  --linha: #333;
+  --largura: 62rem;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--quase-preto);
+  color: var(--corpo);
+  /* JetBrains Mono é o corpo da marca. O fallback é monoespaçado de propósito:
+     se a fonte não carregar, o texto continua com a cara certa. */
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.caixa { max-width: var(--largura); margin: 0 auto; padding: 0 1.5rem; }
+
+/* ── Cabeçalho ───────────────────────────────────────────────────────────── */
+.topo {
+  position: sticky; top: 0; z-index: 10;
+  background: rgba(20, 20, 20, .92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--linha);
+}
+.topo .caixa { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-top: .9rem; padding-bottom: .9rem; }
+.topo img { height: 26px; width: auto; display: block; }
+.topo nav { display: flex; gap: 1.4rem; font-size: .86rem; }
+.topo nav a { color: var(--cinza); text-decoration: none; }
+.topo nav a:hover { color: var(--verde); }
+
+/* ── Herói ───────────────────────────────────────────────────────────────── */
+.heroi { padding: 5.5rem 0 4rem; border-bottom: 1px solid var(--linha); }
+.heroi h1 {
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.15; letter-spacing: -.02em; margin: 0 0 1.2rem; font-weight: 700;
+}
+/* VT323 é de traço fino: só funciona grande e com halo justo — regra do
+   manual da marca. Aqui ela marca UMA palavra, não a frase inteira. */
+.heroi h1 .destaque {
+  font-family: VT323, "JetBrains Mono", monospace;
+  color: var(--verde);
+  font-weight: 400;
+  font-size: 1.15em;
+  text-shadow: 0 0 2px rgba(47, 230, 140, .85), 0 0 8px rgba(47, 230, 140, .5);
+}
+.heroi p { color: var(--cinza); font-size: 1.02rem; max-width: 44rem; margin: 0 0 1.1rem; }
+.heroi .acoes { margin-top: 2rem; display: flex; gap: .9rem; flex-wrap: wrap; }
+
+.botao {
+  display: inline-block; padding: .7rem 1.4rem; border-radius: 4px;
+  text-decoration: none; font-size: .9rem; font-weight: 600; border: 1px solid var(--verde);
+}
+.botao-cheio { background: var(--verde); color: var(--verde-escuro); }
+.botao-cheio:hover { background: #46eb9c; }
+.botao-vazio { color: var(--verde); }
+.botao-vazio:hover { background: rgba(47, 230, 140, .1); }
+
+/* ── Seções ──────────────────────────────────────────────────────────────── */
+section { padding: 4rem 0; border-bottom: 1px solid var(--linha); }
+h2 { font-size: 1.35rem; letter-spacing: -.01em; margin: 0 0 .6rem; }
+.rotulo {
+  font-size: .74rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--verde); margin: 0 0 .8rem;
+}
+.subtitulo { color: var(--cinza); max-width: 44rem; margin: 0 0 2.4rem; }
+
+.grade { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.cartao {
+  background: var(--superficie); border: 1px solid var(--linha);
+  border-radius: 6px; padding: 1.3rem 1.4rem;
+}
+.cartao h3 { margin: 0 0 .4rem; font-size: .98rem; color: var(--verde); }
+.cartao p { margin: 0; color: var(--cinza); font-size: .88rem; line-height: 1.65; }
+
+.pilares { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+.pilar h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.pilar p { margin: 0; color: var(--cinza); font-size: .9rem; }
+.pilar .num {
+  font-family: VT323, monospace; font-size: 1.9rem; color: var(--verde);
+  line-height: 1; display: block; margin-bottom: .5rem;
+}
+
+/* ── Rodapé ──────────────────────────────────────────────────────────────── */
+.rodape { padding: 2.6rem 0; border-bottom: 0; color: var(--cinza); font-size: .84rem; }
+.rodape .caixa { display: flex; flex-wrap: wrap; gap: 1rem 2rem; justify-content: space-between; align-items: flex-start; }
+.rodape a { color: var(--cinza); text-decoration: none; }
+.rodape a:hover { color: var(--verde); text-decoration: underline; }
+.rodape nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+.rodape .cnpj { font-size: .8rem; opacity: .8; }
+
+/* ── Páginas legais ──────────────────────────────────────────────────────────
+   O kernel da marca é explícito: texto longo e formal sai do terminal e vai
+   para Inter. Monoespaçada em documento de dez mil caracteres cansa a leitura
+   e atrapalha justamente quem precisa entender o que assinou. O fundo e o
+   verde continuam os mesmos, então não parece outro site. */
+.documento { padding: 3.5rem 0 4.5rem; }
+.documento,
+.documento p, .documento li, .documento td, .documento th {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.documento { font-size: 16.5px; line-height: 1.75; }
+.documento h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); line-height: 1.2; letter-spacing: -.02em; margin: 0 0 .4rem; }
+.documento .data { color: var(--cinza); font-size: .88rem; margin: 0 0 2.4rem; }
+.documento h2 {
+  font-size: 1.16rem; margin: 2.6rem 0 .7rem; padding-top: 1.5rem;
+  border-top: 1px solid var(--linha);
+}
+.documento h3 { font-size: 1rem; margin: 1.7rem 0 .4rem; color: var(--verde); }
+.documento a { color: var(--verde); text-decoration: underline; text-underline-offset: 2px; }
+.documento ul, .documento ol { padding-left: 1.25rem; }
+.documento li { margin: .4rem 0; }
+.documento strong { font-weight: 600; }
+
+.rolagem { overflow-x: auto; }
+.documento table { border-collapse: collapse; width: 100%; margin: 1.1rem 0; font-size: .92rem; min-width: 32rem; }
+.documento th, .documento td { border: 1px solid var(--linha); padding: .6rem .7rem; text-align: left; vertical-align: top; }
+.documento th { background: var(--superficie); font-weight: 600; }
+
+.destaque-bloco {
+  background: var(--superficie); border: 1px solid var(--linha);
+  border-left: 3px solid var(--verde); border-radius: 6px;
+  padding: 1.1rem 1.3rem; margin: 1.7rem 0;
+}
+.destaque-bloco p { margin: .4rem 0; }
+.destaque-bloco .email { font-size: 1.1rem; font-weight: 600; }
+
+.modelo {
+  background: #0d0d0d; border: 1px solid var(--linha); color: #cfe8db;
+  border-radius: 6px; padding: 1.1rem 1.3rem; margin: 1.2rem 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: .86rem; line-height: 1.65; white-space: pre-wrap; overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  .heroi { padding: 3.5rem 0 2.8rem; }
+  section { padding: 2.8rem 0; }
+  .topo nav { gap: 1rem; font-size: .8rem; }
+  .documento { font-size: 16px; }
+}
+
+/* ── ApolloMedia — acréscimos a esta cópia da folha ──────────────────── */
+/* ⚠️ Esta folha é uma CÓPIA da do site da Apollo Solution. O que vem abaixo
+   é só nosso — se um dia as duas forem unificadas, estas regras têm de ir
+   junto, porque consertam um ponto cego que existe nas duas. */
+
+/* Links dentro de texto corrido.
+   A folha original só estiliza link em `.topo nav`, `.rodape nav` e
+   `.documento`. Link solto num parágrafo saia no AZUL PADRÃO do navegador,
+   que destoa de tudo — e no rodapé saia indistinguível do texto, o que é
+   pior: o aviso da AGPL §13 PRECISA parecer um link para cumprir a licença. */
+.heroi p a,
+.pilar p a,
+.destaque-bloco p a,
+.rodape p a {
+  color: var(--verde);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.heroi p a:hover,
+.pilar p a:hover,
+.destaque-bloco p a:hover,
+.rodape p a:hover {
+  color: var(--corpo);
+}
+
+/* O cabeçalho é `position: sticky`, então um salto de âncora pararia com o
+   título escondido embaixo dele. */
+[id] {
+  scroll-margin-top: 4.5rem;
+}
+
+/* No telefone o cabeçalho fica com 3 links e o mais longo quebra em duas
+   linhas, apertando o lockup. Âncora de seção tem pouco valor em tela
+   estreita — a pessoa rola —, então some com elas e fica só o "Entrar",
+   que é a única ação de verdade do cabeçalho. */
+@media (max-width: 30rem) {
+  .topo nav a[href^="#"] { display: none; }
+}
