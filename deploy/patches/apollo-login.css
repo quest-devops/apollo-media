@@ -149,32 +149,49 @@
   color: #eff8f3;
 }
 /* ── Botão do SSO (ApolloAuth) ───────────────────────────────── */
-/* O Postiz desenha o botão de provedor com `bg-white` e texto escuro. Numa
-   tela escura isso é um retângulo branco gritando no meio do formulário —
-   cara de componente de outro produto. Aqui ele vira o botão secundário da
-   casa: superfície escura, borda verde, texto claro, mesmo desenho dos campos.
+/* MODELO DA CASA, medido no ApolloCloud (apollo.apollocloud.com.br/login) e
+   não inventado: campos → botão primário verde → divisor → botão de SSO
+   BRANCO, texto grafite #202020, raio 10px, altura 46px, peso 600.
+   ⚠️ Eu havia deixado este botão escuro com borda verde, por achar que branco
+   destoaria do tema. Destoa mesmo — e é assim de propósito em toda a suíte:
+   o branco é o contraste que diferencia "entrar com outro sistema" de
+   "entrar aqui". Corrigido após o Leonardo comparar com os outros apps.
 
-   A regra anterior neste ponto só forçava texto escuro sobre o branco, para o
-   texto não sumir. Com o fundo deixando de ser branco, ela deu lugar a esta.
+   O Postiz monta a coluna na ordem SSO → divisor → campos, que é o inverso.
+   Em vez de patchar o login.tsx só para reordenar, usa-se `order` do flexbox:
+   os três são irmãos diretos de um `flex flex-col`. */
+.apollo-login .apollo-form [class*='gap-[12px]'] { order: 1; }  /* campos + Entrar */
+.apollo-login .apollo-form [class*='h-[20px]']   { order: 2; }  /* divisor "OU"   */
+.apollo-login .apollo-form [class*='bg-white']   { order: 3; }  /* botão do SSO   */
 
-   ⚠️ O seletor casa por `[class*='bg-white']` porque é utilitário do Tailwind
-   gerado pelo upstream: se um dia ele trocar a classe, o botão volta a ficar
-   branco — defeito visual, não funcional, mas visível na primeira tela que o
-   cliente vê. */
+/* O rótulo "Continuar com" vinha acima de tudo, para apresentar o botão de
+   provedor. Com o botão indo para baixo, ele ficaria pendurado sobre os campos
+   anunciando algo que não está mais ali — e o divisor "OU" já faz esse papel. */
+.apollo-login .apollo-form [class*='mt-[32px]'] { display: none; }
+
 .apollo-login .apollo-form [class*='bg-white'] {
-  background: rgba(22, 25, 23, 0.85);
-  border: 1px solid #2fe68c;
+  /* ⚠️ `flex: 0 0 auto` é OBRIGATÓRIO. O upstream põe `flex-1` no botão, e
+     num flex de COLUNA isso vira `flex: 1 1 0%` — a altura passa a ser
+     calculada pelo flex e o `height` é IGNORADO. Sem esta linha o botão sai
+     com 35px em vez de 46 e ninguém entende por quê. */
+  flex: 0 0 auto;
+  height: 46px;
+  background: #ffffff;
+  border: 1px solid #ffffff;
   border-radius: 10px;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+  font-weight: 600;
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 .apollo-login .apollo-form [class*='bg-white'],
 .apollo-login .apollo-form [class*='bg-white'] div {
-  color: #eff8f3;
+  color: #202020;
 }
 .apollo-login .apollo-form [class*='bg-white']:hover {
-  background: rgba(47, 230, 140, 0.12);
-  box-shadow: 0 0 0 3px rgba(47, 230, 140, 0.15);
+  background: #eff8f3;
+  border-color: #eff8f3;
 }
+
 .apollo-login input[type='email'],
 .apollo-login input[type='password'],
 .apollo-login input[type='text'] {

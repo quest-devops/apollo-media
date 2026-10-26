@@ -98,6 +98,21 @@ while [ $i -lt 40 ]; do
   [ "$COD" != "000" ] && [ "$COD" -lt 500 ] && break
   i=$((i+1)); sleep 10
 done
+# ⚠️ DEFEITO CONHECIDO E REPRODUTÍVEL deste stack: depois de um
+# `up -d --force-recreate`, o pm2 marca o backend como "online" e NADA escuta
+# na 3000. O contêiner ainda assim fica "healthy", porque o healthcheck prova
+# a porta 5000 (o nginx interno). Um `restart` resolve. Visto em 03/set e três
+# vezes em 26/out — por isso aqui é tentativa automática, não conselho.
+if ! docker exec "$CTR" node -e "require('http').get('http://localhost:3000/',r=>process.exit(0)).on('error',()=>process.exit(1))" 2>/dev/null; then
+  echo "== backend mudo apos o recreate (defeito conhecido) - reiniciando =="
+  docker compose -f docker-compose.yml --env-file .env restart postiz >/dev/null 2>&1
+  j=0
+  while [ $j -lt 24 ]; do
+    docker exec "$CTR" node -e "require('http').get('http://localhost:3000/',r=>process.exit(0)).on('error',()=>process.exit(1))" 2>/dev/null && break
+    j=$((j+1)); sleep 5
+  done
+fi
+
 [ "$i" -ge 40 ] && falha "o app nao voltou em ~7min. Rollback: cp -p $BKP $ENVF && docker compose up -d --force-recreate postiz"
 
 echo "== variaveis em vigor no container =="
